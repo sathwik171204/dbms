@@ -106,3 +106,35 @@ int compareAttrs(union Attribute attr1, union Attribute attr2, int attrType) {
     else  return 0;
     }
     
+    
+    
+    
+int RecBuffer::setRecord(union Attribute *rec, int slotNum) {
+    unsigned char *bufferPtr;
+    
+
+    int ret = loadBlockAndGetBufferPtr(&bufferPtr);
+  if (ret != SUCCESS) {
+    return ret;   // return any errors that might have occured in the process
+  } 
+    struct HeadInfo head;
+    this->getHeader(&head);
+  
+    int attrCount=head.numAttrs;
+    int slotCount=head.numSlots;
+    
+     if(slotNum>=slotCount || slotNum<0)
+     return E_OUTOFBOUND;
+     
+     int recordSize=ATTR_SIZE *attrCount;
+      
+     bufferPtr=bufferPtr + HEADER_SIZE + (slotNum*recordSize)+slotCount;
+     memcpy(bufferPtr,rec,recordSize);
+  
+    
+    if(StaticBuffer::setDirtyBit(this->blockNum)!=SUCCESS)
+       return 0;
+       
+       return SUCCESS;
+}
+    
