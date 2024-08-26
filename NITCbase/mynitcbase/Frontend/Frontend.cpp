@@ -21,25 +21,13 @@ int Frontend::drop_table(char relname[ATTR_SIZE]) {
 }
 
 int Frontend::open_table(char relname[ATTR_SIZE]) {
-  // Schema::openRel
-  return SUCCESS;
+  return Schema::openRel(relname);
 }
 
 int Frontend::close_table(char relname[ATTR_SIZE]) {
-  // Schema::closeRel
-  return SUCCESS;
+  return Schema::closeRel(relname);
 }
 
-int Frontend::alter_table_rename(char relname_from[ATTR_SIZE], char relname_to[ATTR_SIZE]) {
-  // Schema::renameRel
-  return SUCCESS;
-}
-
-int Frontend::alter_table_rename_column(char relname[ATTR_SIZE], char attrname_from[ATTR_SIZE],
-                                        char attrname_to[ATTR_SIZE]) {
-  // Schema::renameAttr
-  return SUCCESS;
-}
 
 int Frontend::create_index(char relname[ATTR_SIZE], char attrname[ATTR_SIZE]) {
   // Schema::createIndex
@@ -97,4 +85,14 @@ int Frontend::custom_function(int argc, char argv[][ATTR_SIZE]) {
   // implement whatever you desire
 
   return SUCCESS;
+}
+
+
+int Frontend::alter_table_rename(char relname_from[ATTR_SIZE], char relname_to[ATTR_SIZE]) {
+  return Schema::renameRel(relname_from, relname_to);
+}
+
+int Frontend::alter_table_rename_column(char relname[ATTR_SIZE], char attrname_from[ATTR_SIZE],
+                                        char attrname_to[ATTR_SIZE]) {
+  return Schema::renameAttr(relname, attrname_from, attrname_to);
 }
