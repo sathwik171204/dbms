@@ -47,26 +47,33 @@ int RecBuffer::getRecord(union Attribute *rec, int slotNum) {
 }
 
 
-int BlockBuffer::loadBlockAndGetBufferPtr(unsigned char **buffPtr) {
-  
-  int bufferNum = StaticBuffer::getBufferNum(this->blockNum);
+int BlockBuffer::loadBlockAndGetBufferPtr(unsigned char ** buffPtr) {
+    int bufferNum = StaticBuffer::getBufferNum(this->blockNum);
 
-  if (bufferNum == E_BLOCKNOTINBUFFER) {
-    bufferNum = StaticBuffer::getFreeBuffer(this->blockNum);
+     if (bufferNum!=E_BLOCKNOTINBUFFER)
+        {
+          StaticBuffer::metainfo[bufferNum].timeStamp=0;
+          for(int i=0;i<BUFFER_CAPACITY;i++)
+          {
+            if(i!=bufferNum && StaticBuffer::metainfo[i].free==false)
+            StaticBuffer::metainfo[bufferNum].timeStamp+=1;
+          }
+        }
+     else
+        {
+           bufferNum = StaticBuffer::getFreeBuffer(this->blockNum);
+           if(bufferNum== E_OUTOFBOUND)
+             return E_OUTOFBOUND;
+           Disk::readBlock(StaticBuffer::blocks[bufferNum],this->blockNum);
+           
 
-    if (bufferNum == E_OUTOFBOUND) {
-      return E_OUTOFBOUND;
-    }
+           
+        }
+        *buffPtr = StaticBuffer::blocks[bufferNum];
+        
+        return SUCCESS;
 
-    Disk::readBlock(StaticBuffer::blocks[bufferNum], this->blockNum);
-  }
-
-  
-  *buffPtr = StaticBuffer::blocks[bufferNum];
-
-  return SUCCESS;
-}
-/* used to get the slotmap from a record block
+}/* used to get the slotmap from a record block
 NOTE: this function expects the caller to allocate memory for *slotMap
 */
 int RecBuffer::getSlotMap(unsigned char *slotMap) {
