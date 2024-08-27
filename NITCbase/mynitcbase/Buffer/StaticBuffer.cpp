@@ -47,7 +47,7 @@ int StaticBuffer::getFreeBuffer(int blockNum) {
   int max=-2;
   for(int i=0;i<BUFFER_CAPACITY;i++)
   {
-     if(metainfo[i].timeStamp<max)
+     if(metainfo[i].timeStamp>max)
      {
         index=i;
         max=metainfo[i].timeStamp;
@@ -60,7 +60,7 @@ int StaticBuffer::getFreeBuffer(int blockNum) {
       metainfo[index].blockNum=blockNum;
       metainfo[index].free = false;
       metainfo[index].dirty = false;
-      metainfo[index].timeStamp = metainfo[index].timeStamp+1;
+      metainfo[index].timeStamp = 0;
       return index;
     
       
