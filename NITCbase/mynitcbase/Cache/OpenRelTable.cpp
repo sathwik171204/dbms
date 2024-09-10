@@ -129,6 +129,128 @@ OpenRelTable::OpenRelTable() {
 
 }
 
+int OpenRelTable::openRel( char relName[ATTR_SIZE]) {
+
+
+  int relId=getRelId(relName);
+  
+  if(relId>=0){
+      return relId;
+  }
+  
+  
+  int freeId=OpenRelTable::getFreeOpenRelTableEntry();
+
+  /* find a free slot in the Open Relation Table
+     using OpenRelTable::getFreeOpenRelTableEntry(). */
+
+  if (freeId==E_CACHEFULL){
+    return E_CACHEFULL;
+  }
+
+  // let relId be used to store the free slot.
+   relId=freeId;
+
+  /* Setting up Relation Cache entry for the relation */
+    union Attribute a10;
+    strcpy(a10.sVal,relName);
+    RelCacheEntry relCatBuf;
+    RelCacheTable::getRelCatEntry(0,&relCatBuf.relCatEntry);
+    RelCacheTable::resetSearchIndex(RELCAT_RELID);
+    
+    RecId r=BlockAccess::linearSearch(0,(char*)"RelName",a10, EQ);
+    
+    
+    
+    
+    
+  /* search for the entry with relation name, relName, in the Relation Catalog using
+      BlockAccess::linearSearch().
+      Care should be taken to reset the searchIndex of the relation RELCAT_RELID
+      before calling linearSearch().*/
+
+  // relcatRecId stores the rec-id of the relation relName in the Relation Catalog.
+  RecId relcatRecId=r;
+
+  if (relcatRecId.block ==-1 && relcatRecId.slot==-1) {
+    // (the relation is not found in the Relation Catalog.)
+    return E_RELNOTEXIST;
+  }
+  
+  
+  
+    union Attribute a7[6];
+    RecBuffer r4(relcatRecId.block);
+    r4.getRecord(a7, relcatRecId.slot);
+  struct RelCacheEntry a2;
+  RelCacheTable::recordToRelCatEntry(a7,&a2.relCatEntry);
+  a2.recId=relcatRecId;
+  
+ 
+  RelCacheTable::relCache[relId] = (struct RelCacheEntry*)malloc(sizeof(RelCacheEntry));
+  *(RelCacheTable::relCache[relId]) = a2;
+  OpenRelTable::tableMetaInfo[relId].free=false;
+    
+    
+    
+    
+    
+  /* read the record entry corresponding to relcatRecId and create a relCacheEntry
+      on it using RecBuffer::getRecord() and RelCacheTable::recordToRelCatEntry().
+      update the recId field of this Relation Cache entry to relcatRecId.
+      use the Relation Cache entry to set the relId-th entry of the RelCacheTable.
+    NOTE: make sure to allocate memory for the RelCacheEntry using malloc()
+  */
+
+  /* Setting up Attribute Cache entry for the relation */
+
+  // let listHead be used to hold the head of the linked list of attrCache entries.
+  
+  
+  
+  RelCacheTable::resetSearchIndex(1);
+  
+      struct AttrCacheEntry* head=nullptr;
+      struct AttrCacheEntry* cur=nullptr;
+      
+      int numAttrs = a2.relCatEntry.numAttrs;
+      
+  for(int i=0;i< numAttrs;i++)
+
+  {
+      /* let attrcatRecId store a valid record id an entry of the relation, relName,
+      in the Attribute Catalog.*/
+      RecId attrcatRecId=BlockAccess::linearSearch(1, (char *)"RelName" ,a10,EQ);
+      union Attribute rec[6];
+      RecBuffer r8(attrcatRecId.block);
+      r8.getRecord(rec, attrcatRecId.slot);
+      AttrCacheEntry b;
+      AttrCacheTable::recordToAttrCatEntry(rec,&b.attrCatEntry);
+      b.recId=attrcatRecId;
+      struct AttrCacheEntry* b1=(struct AttrCacheEntry*)malloc(sizeof(AttrCacheEntry));
+      *b1=b;
+      if(head==nullptr)
+      {
+          head=b1;
+          }
+       else
+       {
+         cur->next=b1;
+         }
+       cur=b1;
+      }
+      cur->next=nullptr;
+      AttrCacheTable::attrCache[relId] = head;
+  tableMetaInfo[relId].free=false;
+  strcpy(tableMetaInfo[relId].relName,relName);
+  // update the relIdth entry of the tableMetaInfo with free as false and
+  // relName as the input.
+
+  return relId;
+      
+   
+   }
+
 
 
 int OpenRelTable::getRelId(char relName[ATTR_SIZE]) {
