@@ -67,3 +67,32 @@ int RelCacheTable::resetSearchIndex(int relId) {
    searchIndex.slot=-1;
    return RelCacheTable::setSearchIndex(relId,&searchIndex);
 }
+int RelCacheTable::setRelCatEntry(int relId, RelCatEntry *relCatBuf) {
+
+  if(relId<0||relId>=MAX_OPEN) {
+    return E_OUTOFBOUND;
+  }
+
+  if(relCache[relId]==nullptr) {
+    return E_RELNOTOPEN;
+  }
+
+  
+  relCache[relId]->relCatEntry=*relCatBuf;
+
+  
+  relCache[relId]->dirty=true;
+
+  return SUCCESS;
+}
+
+void RelCacheTable::relCatEntryToRecord(RelCatEntry* relCatEntry,union Attribute record[RELCAT_NO_ATTRS]){
+    strcpy(record[RELCAT_REL_NAME_INDEX].sVal,relCatEntry->relName);
+    record[RELCAT_NO_ATTRIBUTES_INDEX].nVal=(double)relCatEntry->numAttrs ;
+  record[RELCAT_NO_RECORDS_INDEX].nVal=(double)relCatEntry->numRecs;
+  record[RELCAT_FIRST_BLOCK_INDEX].nVal=(double)relCatEntry->firstBlk;
+ record[RELCAT_LAST_BLOCK_INDEX].nVal=(double)relCatEntry->lastBlk;
+  record[RELCAT_NO_SLOTS_PER_BLOCK_INDEX].nVal=(double)relCatEntry->numSlotsPerBlk;
+
+
+}
